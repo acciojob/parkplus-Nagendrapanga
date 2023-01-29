@@ -25,45 +25,46 @@ public class ReservationServiceImpl implements ReservationService {
     public Reservation reserveSpot(Integer userId, Integer parkingLotId, Integer timeInHours, Integer numberOfWheels) throws Exception {
 
 
-            if(!userRepository3.existsById(userId))
-                throw new Exception("Cannot make reservation");
-            if(!parkingLotRepository3.existsById(parkingLotId))
-                throw new Exception("Cannot make reservation");
-
+        try
+        {
+            Reservation reservation = new Reservation();
             User user = userRepository3.findById(userId).get();
-
             ParkingLot parkingLot = parkingLotRepository3.findById(parkingLotId).get();
-
-
+            reservation.setUser(user);
             List<Spot> spots = parkingLot.getSpotList();
-            Spot ospot = null;
+            Spot spot = null;
             int price = Integer.MAX_VALUE;
-            for (Spot sp : spots) {
+            for (Spot s : spots) {
                 int wheels;
-                if (sp.getSpotType() == SpotType.TWO_WHEELER) {
+                if (s.getSpotType() == SpotType.TWO_WHEELER) {
                     wheels = 2;
-                } else if (sp.getSpotType() == SpotType.FOUR_WHEELER) {
+                }
+                else if (s.getSpotType() == SpotType.FOUR_WHEELER) {
                     wheels = 4;
-                } else {
+                }
+                else {
                     wheels = 100;
                 }
-                if (!sp.getOccupied() && wheels > numberOfWheels && sp.getPricePerHour()< price) {
-                    ospot = sp;
-                    price = sp.getPricePerHour();
+                if (!s.getOccupied() && wheels > numberOfWheels && s.getPricePerHour() < price) {
+                    spot = s;
+                    price = s.getPricePerHour();
                 }
             }
-            if(ospot==null)
-                throw new Exception("Cannot make reservation");
-
-            Reservation reservation = new Reservation();
+            if (spot == null) {
+                throw new Exception();
+            }
+            reservation.setSpot(spot);
             reservation.setNumberOfHours(timeInHours);
-            reservation.setUser(user);
-            reservation.setSpot(ospot);
-            ospot.setOccupied(true);
-            ospot.getReservationList().add(reservation);
+            spot.setOccupied(true);
             user.getReservationList().add(reservation);
-            reservationRepository3.save(reservation);
+            spot.getReservationList().add(reservation);
+            spotRepository3.save(spot);
+            userRepository3.save(user);
             return reservation;
+        }
+        catch (Exception e) {
+            return null;
+        }
 
     }
 
