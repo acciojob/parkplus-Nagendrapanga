@@ -22,9 +22,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public User updatePassword(Integer userId, String password) {
 
-        User user = userRepository4.findById(userId).get();
+        User user= userRepository4.findById(userId).get();
         user.setPassword(password);
-        deleteUser(userId);
         userRepository4.save(user);
         return user;
 
@@ -37,6 +36,6 @@ public class UserServiceImpl implements UserService {
         user.setName(name);
         user.setPhoneNumber(phoneNumber);
         user.setPassword(password);
-        user.setReservationList(new ArrayList<>());
+        userRepository4.save(user);
     }
 }
